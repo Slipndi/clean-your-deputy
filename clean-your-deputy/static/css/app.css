@@ -2,9 +2,21 @@
     box-sizing: border-box;
 }
 
-body{
-    height: 100px;
+.grid-container {
+    display: grid;
+    min-height: 100vh;
+    grid-template-areas: "header"
+    "main" 
+    "footer";
+    overflow: hidden;
 }
-#app {
-    height:200px;
+
+header{
+    height: 10vh;
+}
+main{
+    height:80vh;
+}
+footer{
+    height:10vh;
 }
