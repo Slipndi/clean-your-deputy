@@ -1,7 +1,7 @@
 import os
 
 from flask import Flask, render_template
-
+import requests
 
 def create_app(test_config=None) -> Flask:
     # Création et configuration de l'application
@@ -13,10 +13,12 @@ def create_app(test_config=None) -> Flask:
         return render_template('index.html')
 
     @app.route('/deputies', methods=['GET'])
-    def get_al_deputies():
-        return True
+    def get_all_deputies():
+        response = requests.get('https://www.nosdeputes.fr/deputes/enmandat/json')
+        all_deputies = response.text
+        return all_deputies
     
-    @app.route('/deputy/<deputy_id>')
+    @app.route('/deputy/<deputy_id>', methods=['GET'])
     def get_deputy(deputy_id):
         return deputy_id
     
@@ -24,7 +26,8 @@ def create_app(test_config=None) -> Flask:
     def get_all_political_parties():
         return True
     
-    @app.route('/political-party/<political_party_id>')
+    @app.route('/political-party/<political_party_id>', methods=['GET'])
     def get_political_party(political_party_id):
         return True    
+    
     return app
