@@ -2,6 +2,9 @@
     box-sizing: border-box;
 }
 
+body {
+    background-color: #d3d3d3;
+}
 .grid-container {
     display: grid;
     min-height: 100vh;
@@ -9,6 +12,7 @@
     "main" 
     "footer";
     overflow: hidden;
+    width:80%;
 }
 
 header{
