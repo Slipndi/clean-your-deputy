@@ -1,6 +1,30 @@
 {% extends 'app.html' %}
 
 {% block result %}
-<img src="https://www.nosdeputes.fr/depute/photo/{{deputy_slug}}/200" alt="photo" />
-{{ deputy_data }}
+<div>
+    <h1 id="name"></h1>
+    <h2 id="groupe"></h2>
+    <div>  
+        <img src="https://www.nosdeputes.fr/depute/photo/{{deputy_slug}}/200" alt="photo" />
+        <h3 id="partie"></h3>
+        <p id="details"></p>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+    <script type="text/javascript">
+            const jsonfile = JSON.parse({{ deputy_data|tojson }});
+            const deputyActivities = JSON.parse({{deputy_activities|tojson }});
+
+            let deputyInfos = jsonfile.depute;
+            let details = `${jsonfile.depute.profession} (${deputyInfos.num_deptmt})`;
+
+            document.querySelector("#name").innerHTML = deputyInfos.nom;
+            document.querySelector("#groupe").innerHTML = deputyInfos.groupe.organisme;
+            document.querySelector("#partie").innerHTML = deputyInfos.parti_ratt_financier;
+            document.querySelector('#details').innerHTML = details;
+
+    </script>
 {% endblock %}
