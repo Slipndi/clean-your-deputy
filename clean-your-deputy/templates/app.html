@@ -10,7 +10,10 @@
 </head>
 <body class="grid-container">
     <header>header</header>
-    <main>Main</main>
+    <main>
+
+        {% block result %} {% endblock %}
+    </main>
     <footer>footer</footer>
 </body>
 <script src="{{ url_for('static',filename='js/app.js') }}" type="module"></script>

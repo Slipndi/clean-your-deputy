@@ -1,0 +1,8 @@
+{% extends 'app.html' %}
+
+{% block result %}
+    <form method="GET" action="/deputy">
+        {{ form_to_display.select_field }}
+        <input type="submit" value="Selectionner">
+    </form>
+{% endblock %}

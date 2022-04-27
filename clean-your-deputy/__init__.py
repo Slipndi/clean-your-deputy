@@ -1,32 +1,50 @@
 import os
 from tkinter import Image
+from tkinter.tix import Select
 
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 import requests
+import secrets
+import json
+from flask_wtf import FlaskForm
+from wtforms import SelectField
 
 # Constantes utiles dans l'application
 PICTURE_HEIGHT = 60
-RETURN_FORMAT = 'json'
+RESPONSE_FORMAT = 'json'
+
+class deputies_form(FlaskForm):
+    select_field = SelectField('Choix du député')
+
 
 def create_app(test_config=None) -> Flask:        
     # Création et configuration de l'application
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_pyfile('config.py', silent=True)
+    # génération d'une api key aléatoire
+    app.secret_key = secrets.token_urlsafe(16)
 
     @app.route('/', methods=['GET'])
     def index():
-        return render_template('index.html')
+        """ Point d'entrée de l'application, génère l'affichage de la liste des députés
 
-    @app.route('/deputies', methods=['GET'])
-    def get_all_deputies():
-        all_deputies = requests.get('https://www.nosdeputes.fr/deputes/enmandat/json').json()
-        return all_deputies
+        Returns:
+            render_template: renvois le template component/select-form.html accompagné d'un simple formulaire
+            ce formulaire est composé d'un select
+        """
+        all_deputies_json = requests.get('https://www.nosdeputes.fr/deputes/enmandat/json').json()
+        deputy_form = deputies_form()
+        deputy_form.select_field.choices = [(deputy['depute']['slug'], deputy['depute']['nom']) for deputy in all_deputies_json['deputes']]   
+
+        return render_template('/components/select-form.html', form_to_display=deputy_form)
+
     
-    @app.route('/deputy/<deputy_slug>', methods=['GET'])
-    def get_deputy(deputy_slug):
-        deputy_picture = requests.get(f'https://www.nosdeputes.fr/depute/photo/{deputy_slug}/{PICTURE_HEIGHT}').content
-        deputy_data = requests.get(f'https://www.nosdeputes.fr/{deputy_slug}/{RETURN_FORMAT}').json()
-        return deputy_picture
+    @app.route('/deputy', methods=['GET'])
+    def get_deputy():
+        deputy_slug = request.args.get('select_field')
+        deputy_data = requests.get(f'https://www.nosdeputes.fr/{deputy_slug}/{RESPONSE_FORMAT}').json()
+        
+        return render_template('/components/details.html', deputy_data=deputy_data, deputy_slug=deputy_slug)
     
     @app.route('/political-parties', methods=['GET'])
     def get_all_political_parties():
