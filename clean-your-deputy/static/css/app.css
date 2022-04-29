@@ -11,15 +11,14 @@ body {
     grid-template-areas: "header"
     "main" 
     "footer";
-    overflow: hidden;
     width:80%;
 }
 
 header{
-    height: 10vh;
+    height: 7vh;
 }
 main{
-    height:80vh;
+    min-height:80vh;
 }
 footer{
     height:10vh;

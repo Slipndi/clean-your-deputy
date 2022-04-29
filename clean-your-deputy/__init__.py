@@ -43,15 +43,16 @@ def create_app(test_config=None) -> Flask:
     @app.route('/deputy', methods=['GET'])
     def get_deputy():
         deputy_slug = request.args.get('select_field')
-        deputy_data = requests.get(f'https://www.nosdeputes.fr/{deputy_slug}/{RESPONSE_FORMAT}').json()
         deputy_activities = requests.get(f'https://www.nosdeputes.fr/synthese/data/{RESPONSE_FORMAT}').json()
+        for data in deputy_activities['deputes'] : 
+            if data['depute']['slug'] == deputy_slug :
+                deputy_details = data["depute"]
         
         return render_template(
-            '/components/details.html', 
-            deputy_data=json.dumps(deputy_data), 
-            deputy_slug=deputy_slug,
-            deputy_activities=json.dumps(deputy_activities)
+            '/components/details.html',  
+            deputy_activities=deputy_details
         )
+
     
     @app.route('/political-parties', methods=['GET'])
     def get_all_political_parties():
