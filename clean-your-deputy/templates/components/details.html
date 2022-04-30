@@ -1,9 +1,8 @@
 {% extends 'app.html' %}
 
 {% block result %}
-
+{{dt}} {{deputy_stats}}
 <div>
-    {{deputy_activities}}
     <h1>{{deputy_activities['nom']}}</h1>
     <h2>{{deputy_activities['groupe_sigle']}}</h2>
     <div>  
@@ -11,21 +10,18 @@
         <h3>{{deputy_activities['parti_ratt_financier']}}</h3>
         <p> {{deputy_activities['profession']}} ({{deputy_activities['nom_circo']}})</p>
     </div>
-    <H3>Evaluation du temps de travail par semaine</H3>
+    <H3>Evaluation du temps de travail moyen hebdomadaire</H3>
     <article>
-        <h4>Présence</h4>
+        <h4>Activité générale</h4>
         <ul>
             <li>
-                Semaines de présence : {{deputy_activities['semaines_presence']}}
+                Interventions : {{(deputy_activities['hemicycle_interventions'] / deputy_activities['semaines_presence']) | round(2, 'floor')}}
             </li>
             <li>
-                Interventions : {{(deputy_activities['hemicycle_interventions'] / deputy_activities['semaines_presence'] * 100) | round}} %
+                Questions orales : {{(deputy_activities['questions_orales'] / deputy_activities['semaines_presence']) | round(2, 'floor')}}
             </li>
             <li>
-                Questions orales : {{(deputy_activities['questions_orales'] / deputy_activities['semaines_presence'] * 100) | round}} %
-            </li>
-            <li>
-                Questions écrites : {{(deputy_activities['questions_ecrites'] / deputy_activities['semaines_presence'] * 100) | round}} %
+                Questions écrites : {{(deputy_activities['questions_ecrites'] / deputy_activities['semaines_presence']) | round(2, 'floor')}}
             </li>
         </ul>
     </article>
@@ -33,13 +29,10 @@
         <h4>Commissions</h4>
         <ul>
             <li>
-                Présences : {{deputy_activities['commission_presences']}}
+                Interventions : {{(deputy_activities['commission_interventions'] / deputy_activities['commission_presences']) | round(2, 'floor') }}
             </li>
             <li>
-                Interventions : {{deputy_activities['commission_interventions']}} 
-            </li>
-            <li>
-                Rapports : {{deputy_activities['rapports']}}
+                Rapports : {{(deputy_activities['rapports'] / deputy_activities['commission_presences']) | round(2, 'floor')}}
             </li>
         </ul>
     </article>
@@ -47,13 +40,13 @@
         <h4>Production et améliorations des lois</h4>
         <ul>
             <li>
-                Amendements proposés : {{deputy_activities['amendements_proposes']}}
+                Amendements proposés : {{deputy_stats['proposes']}}
             </li>
             <li>
-                Amendements signés : {{deputy_activities['amendements_signes']}} 
+                Amendements signés : {{deputy_stats['signes']}}
             </li>
             <li>
-                Amendements adoptés : {{deputy_activities['amendements_adoptes']}}
+                Amendements adoptés : {{deputy_stats['adoptes']}}
             </li>
         </ul>
     </article>

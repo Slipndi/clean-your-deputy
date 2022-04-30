@@ -44,14 +44,48 @@ def create_app(test_config=None) -> Flask:
     def get_deputy():
         deputy_slug = request.args.get('select_field')
         deputy_activities = requests.get(f'https://www.nosdeputes.fr/synthese/data/{RESPONSE_FORMAT}').json()
-        for data in deputy_activities['deputes'] : 
-            if data['depute']['slug'] == deputy_slug :
-                deputy_details = data["depute"]
+        moyenne={}
+        deputy_stats = {}
+
+        deputy_details = get_deputy_data(deputy_slug, deputy_activities, deputy_stats)
+        
+        get_global_statistics(deputy_activities, moyenne)
         
         return render_template(
             '/components/details.html',  
-            deputy_activities=deputy_details
+            deputy_activities=deputy_details,
+            dt=moyenne,
+            deputy_stats=deputy_stats
         )
+
+    def get_deputy_data(deputy_slug, deputy_activities, deputy_stats):
+        for data in deputy_activities['deputes'] : 
+            if data['depute']['slug'] == deputy_slug :
+                deputy_details = data["depute"]
+                deputy_stats['weeks'] = data['depute']['semaines_presence']
+                deputy_stats['proposes'] = round(data['depute']['amendements_proposes'] /data['depute']['semaines_presence'] ,2)
+                deputy_stats['signes'] = round(data['depute']['amendements_signes']/data['depute']['semaines_presence'] ,2)
+                deputy_stats['adoptes'] = round(data['depute']['amendements_adoptes']/data['depute']['semaines_presence'] ,2)
+        return deputy_details
+
+    def get_global_statistics(deputy_activities, moyenne):
+        deputy_number=0
+        weeks_quantity=0
+        amendements_proposes=0
+        amendements_signes=0
+        amendements_adoptes=0
+        
+        for data in deputy_activities['deputes'] : 
+            deputy_number += 1
+            weeks_quantity += data['depute']['semaines_presence']
+            amendements_proposes += data['depute']['amendements_proposes']
+            amendements_signes += data['depute']['amendements_signes']
+            amendements_adoptes += data['depute']['amendements_adoptes']
+        
+        moyenne['weeks'] = round(weeks_quantity / deputy_number,2)
+        moyenne['proposes'] = round(amendements_proposes / weeks_quantity, 2)
+        moyenne['signes'] = round(amendements_signes / weeks_quantity, 2)
+        moyenne['adoptes'] = round(amendements_adoptes / weeks_quantity, 2)
 
     
     @app.route('/political-parties', methods=['GET'])
