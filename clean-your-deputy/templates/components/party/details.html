@@ -1,0 +1,55 @@
+{% extends 'app.html' %}
+
+{% block result %}
+<div class="flex flex-col">
+    <h1 class="flex align-center">
+        <a href="/">
+            <svg id='return' xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+        </a>
+        {{party['nom']}}
+    </h1>
+    <H3>Evaluation du temps de travail moyen hebdomadaire</H3>
+    <article>
+        <h4>Activité générale</h4>
+        <ul>
+            <li>
+                Questions orales : {{party['oral']}}
+            </li>
+            <li>
+                Questions écrites : {{party['write']}}
+            </li>
+        </ul>
+    </article>
+    <article>
+        <h4>Commissions</h4>
+        <ul>
+            <li>
+                Interventions : {{party['interventions']}}
+            </li>
+            <li>
+                Rapports :{{party['rapports']}}
+            </li>
+        </ul>
+    </article>
+    <article>
+        <h4>Production et améliorations des lois</h4>
+        <ul>
+            <li>
+                Amendements proposés : {{party['proposes']}}
+            </li>
+            <li>
+                Amendements signés : {{party['signes']}}
+            </li>
+            <li>
+                Amendements adoptés : {{party['adoptes']}}
+            </li>
+        </ul>
+        <img src='data:image/png;base64,{{chart}}' width="100%" id="chart"/>
+    </article>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}

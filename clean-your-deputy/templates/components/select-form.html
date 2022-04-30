@@ -1,8 +1,14 @@
 {% extends 'app.html' %}
 
 {% block result %}
-    <form method="GET" action="/deputy">
-        {{ form_to_display.select_field }}
+    <form method="GET" action="/deputy" class="flex flex-col">
+        <label>{{ deputy.select_field.label }}:</label>
+        {{ deputy.select_field }}
+        <input type="submit" value="Selectionner">
+    </form>
+    <form method="GET" action="/party" class="flex flex-col">
+        <label>{{ party.select_field.label }}:</label>
+        {{ party.select_field }}
         <input type="submit" value="Selectionner">
     </form>
 {% endblock %}

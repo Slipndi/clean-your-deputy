@@ -1,4 +1,7 @@
 
+from asyncore import write
+import json
+from tkinter import ROUND
 from flask import Flask, render_template, request
 import requests
 import secrets
@@ -15,10 +18,15 @@ from io import BytesIO
 
 # Constantes utiles dans l'application
 PICTURE_HEIGHT = 60
+ROUND_VALUE = 2
 RESPONSE_FORMAT = 'json'
 
 class deputies_form(FlaskForm):
-    select_field = SelectField('Choix du député')
+    select_field = SelectField(u'Choix du député')
+
+class parties_form(FlaskForm):
+    select_field = SelectField(u'Choix du parti')
+    
 
 
 def create_app(test_config=None) -> Flask:        
@@ -37,10 +45,16 @@ def create_app(test_config=None) -> Flask:
             ce formulaire est composé d'un select
         """
         all_deputies_json = requests.get('https://www.nosdeputes.fr/deputes/enmandat/json').json()
+        
         deputy_form = deputies_form()
         deputy_form.select_field.choices = [(deputy['depute']['slug'], deputy['depute']['nom']) for deputy in all_deputies_json['deputes']]   
-        return render_template('/components/select-form.html', form_to_display=deputy_form)
- 
+        
+        all_group_json = requests.get('https://www.nosdeputes.fr/organismes/groupe/json').json()
+        party_form = parties_form()
+        party_form.select_field.choices = [(party['organisme']['acronyme'], party['organisme']['nom']) for party in all_group_json['organismes']]
+        
+        return render_template('/components/select-form.html', deputy=deputy_form, party=party_form)
+    
     @app.route('/deputy', methods=['GET'])
     def get_deputy():
         """Récupération de toutes les données à afficher sur le député séléctionné
@@ -50,7 +64,7 @@ def create_app(test_config=None) -> Flask:
             reprenant les informations 
         """        
         deputy_slug = request.args.get('select_field')
-        deputy_activities = requests.get(f'https://www.nosdeputes.fr/synthese/data/{RESPONSE_FORMAT}').json()
+        deputy_activities = get_deputies_activities()
         moyenne={}
         deputy_stats={}
 
@@ -60,11 +74,53 @@ def create_app(test_config=None) -> Flask:
         chart = generate_chart(deputy_stats, moyenne)
         
         return render_template(
-            '/components/details.html',  
+            '/components/deputy/details.html',  
             deputy_activities=deputy_details,
             deputy_stats=deputy_stats,
             chart = chart
         )
+
+    @app.route('/party', methods=['GET'])
+    def get_party():
+        moyenne={}
+        party_acronyme = request.args.get('select_field')
+        party_data =get_party_data (party_acronyme, get_deputies_activities())
+        get_global_statistics(get_deputies_activities(), moyenne)
+        
+        chart = generate_chart(party_data, moyenne)
+        
+        return render_template('components/party/details.html', party=party_data, chart=chart)
+    
+    
+    def generate_chart(selected_stats : dict, global_stats : dict) -> base64 :
+        nom = selected_stats['nom']
+        # On vide le graphique pour éviter les superpositions
+        plt.clf()
+        
+        # Mise en forme de la data pour affichage
+        labels = ['proposés', 'signés', 'adoptés']
+        selected = [selected_stats['proposes'], selected_stats['signes'], selected_stats['adoptes']]
+        general = [global_stats['proposes'], global_stats['signes'], global_stats['adoptes']]
+        
+        # génération des barres
+        x_axis = np.arange(len(labels))
+        plt.bar(x_axis -0.2, selected, width=0.4, label=nom)
+        plt.bar(x_axis + 0.2, general, width=0.4, label='moyenne')
+        # labels
+        plt.xticks(x_axis, labels)
+        
+        # Ajout de la légende
+        plt.legend()
+        
+        # Retour en base64 pour affichage
+        buf = BytesIO()
+        plt.savefig(buf, format="png", transparent=True)
+        data = base64.b64encode(buf.getbuffer()).decode("ascii")
+        
+        return data
+    
+    def get_deputies_activities() -> dict :
+        return requests.get(f'https://www.nosdeputes.fr/synthese/data/{RESPONSE_FORMAT}').json()
 
     def get_deputy_data(deputy_slug, deputy_activities, deputy_stats) -> dict :
         for data in deputy_activities['deputes'] : 
@@ -72,10 +128,42 @@ def create_app(test_config=None) -> Flask:
                 deputy_details = data["depute"]
                 deputy_stats['nom'] = data['depute']['nom']
                 deputy_stats['weeks'] = data['depute']['semaines_presence']
-                deputy_stats['proposes'] = round(data['depute']['amendements_proposes'] /data['depute']['semaines_presence'] ,2)
-                deputy_stats['signes'] = round(data['depute']['amendements_signes']/data['depute']['semaines_presence'] ,2)
-                deputy_stats['adoptes'] = round(data['depute']['amendements_adoptes']/data['depute']['semaines_presence'] ,2)
+                deputy_stats['proposes'] = round(data['depute']['amendements_proposes'] /data['depute']['semaines_presence'] ,ROUND_VALUE)
+                deputy_stats['signes'] = round(data['depute']['amendements_signes']/data['depute']['semaines_presence'] ,ROUND_VALUE)
+                deputy_stats['adoptes'] = round(data['depute']['amendements_adoptes']/data['depute']['semaines_presence'] ,ROUND_VALUE)
         return deputy_details
+    
+    def get_party_data(acronyme : str, deputies_activity: dict) -> dict : 
+        party_data = {}
+        count=weeks=oral=write=proposes=signes=adoptes=presences=interventions=rapports=0
+        
+        for data in deputies_activity['deputes'] :
+            if data['depute']['groupe_sigle'] == acronyme :
+                count+=1
+                weeks += data['depute']['semaines_presence']
+                oral += data['depute']['questions_orales']
+                write += data['depute']['questions_ecrites']
+                proposes += data['depute']['amendements_proposes']
+                signes += data['depute']['amendements_signes']
+                adoptes += data['depute']['amendements_adoptes']
+                presences += data['depute']['commission_presences']
+                interventions += data['depute']['commission_interventions']
+                rapports += data['depute']['rapports']
+                
+        party_data['count'] = count
+        party_data['nom'] = acronyme
+        party_data['weeks'] = weeks
+        party_data['tea']=oral
+        party_data['oral'] = round(oral/weeks, ROUND_VALUE)
+        party_data['write'] = round(write/weeks, ROUND_VALUE)
+        party_data['proposes'] = round(proposes/weeks, ROUND_VALUE)
+        party_data['signes'] = round(signes/weeks, ROUND_VALUE)
+        party_data['adoptes'] = round(adoptes/weeks, ROUND_VALUE)
+        party_data['interventions'] = round(interventions/presences, ROUND_VALUE)
+        party_data['rapports'] = round(rapports/presences, ROUND_VALUE)
+        
+        return party_data
+        
 
     def get_global_statistics(deputy_activities, moyenne) -> None :
         deputy_number=0
@@ -91,46 +179,9 @@ def create_app(test_config=None) -> Flask:
             amendements_signes += data['depute']['amendements_signes']
             amendements_adoptes += data['depute']['amendements_adoptes']
         
-        moyenne['weeks'] = round(weeks_quantity / deputy_number,2)
-        moyenne['proposes'] = round(amendements_proposes / weeks_quantity, 2)
-        moyenne['signes'] = round(amendements_signes / weeks_quantity, 2)
-        moyenne['adoptes'] = round(amendements_adoptes / weeks_quantity, 2)
-
-    
-    @app.route('/political-parties', methods=['GET'])
-    def get_all_political_parties():
-        return True
-    
-    @app.route('/political-party/<political_party_id>', methods=['GET'])
-    def get_political_party(political_party_id):
-        return True    
-    
-    
-    def generate_chart(selected_stats : dict, global_stats : dict) :
-        # On vide le graphique pour éviter les superpositions
-        plt.clf()
+        moyenne['weeks'] = round(weeks_quantity / deputy_number,ROUND_VALUE)
+        moyenne['proposes'] = round(amendements_proposes / weeks_quantity, ROUND_VALUE)
+        moyenne['signes'] = round(amendements_signes / weeks_quantity, ROUND_VALUE)
+        moyenne['adoptes'] = round(amendements_adoptes / weeks_quantity, ROUND_VALUE)
         
-        # Mise en forme de la data pour affichage
-        labels = ['proposés', 'signés', 'adoptés']
-        selected = [selected_stats['proposes'], selected_stats['signes'], selected_stats['adoptes']]
-        general = [global_stats['proposes'], global_stats['signes'], global_stats['adoptes']]
-        
-        # génération des barres
-        x_axis = np.arange(len(labels))
-        plt.bar(x_axis -0.2, selected, width=0.4, label=selected_stats['nom'])
-        plt.bar(x_axis + 0.2, general, width=0.4, label='moyenne')
-
-        # labels
-        plt.xticks(x_axis, labels)
-        
-        # Ajout de la légende
-        plt.legend()
-        
-        # Retour en base64 pour affichage
-        buf = BytesIO()
-        plt.savefig(buf, format="png", transparent=True)
-        data = base64.b64encode(buf.getbuffer()).decode("ascii")
-        
-        return data
-    
     return app

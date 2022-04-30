@@ -8,11 +8,9 @@
     <link rel="stylesheet" href="{{ url_for('static',filename='css/app.css') }}">
 </head>
 <body class="grid-container">
-    <header>header</header>
     <main>
         {% block result %} {% endblock %}
     </main>
-    <footer>footer</footer>
     {% block scripts %} {% endblock %}
 </body>
 </html>

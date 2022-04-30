@@ -13,13 +13,30 @@ body {
     "footer";
     width:80%;
 }
-
-header{
-    height: 7vh;
-}
 main{
     min-height:80vh;
 }
-footer{
-    height:10vh;
+
+a{
+    color:black;
+    text-decoration: none;
+}
+
+
+.flex {
+    display:flex;
+}
+
+.flex-col {
+    flex-direction: column;
+}
+
+.align-center{
+    align-items: center;
+}
+
+#return {
+    
+    height:3vh;
+    margin-right: 1em;
 }
