@@ -1,7 +1,6 @@
 {% extends 'app.html' %}
 
 {% block result %}
-{{dt}} {{deputy_stats}}
 <div>
     <h1>{{deputy_activities['nom']}}</h1>
     <h2>{{deputy_activities['groupe_sigle']}}</h2>
@@ -49,6 +48,7 @@
                 Amendements adoptés : {{deputy_stats['adoptes']}}
             </li>
         </ul>
+        <img src='data:image/png;base64,{{chart}}' width="100%" id="chart"/>
     </article>
 </div>
 {% endblock %}

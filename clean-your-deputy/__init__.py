@@ -1,14 +1,17 @@
-import os
-import string
-from tkinter import Image
-from tkinter.tix import Select
 
 from flask import Flask, render_template, request
 import requests
 import secrets
-import json
+import numpy as np
+import matplotlib
+matplotlib.use('Agg')
+
+import matplotlib.pyplot as plt
 from flask_wtf import FlaskForm
 from wtforms import SelectField
+
+import base64
+from io import BytesIO
 
 # Constantes utiles dans l'application
 PICTURE_HEIGHT = 60
@@ -26,7 +29,7 @@ def create_app(test_config=None) -> Flask:
     app.secret_key = secrets.token_urlsafe(16)
 
     @app.route('/', methods=['GET'])
-    def index():
+    def index() -> str:
         """ Point d'entrée de l'application, génère l'affichage de la liste des députés
 
         Returns:
@@ -36,39 +39,45 @@ def create_app(test_config=None) -> Flask:
         all_deputies_json = requests.get('https://www.nosdeputes.fr/deputes/enmandat/json').json()
         deputy_form = deputies_form()
         deputy_form.select_field.choices = [(deputy['depute']['slug'], deputy['depute']['nom']) for deputy in all_deputies_json['deputes']]   
-
         return render_template('/components/select-form.html', form_to_display=deputy_form)
-
-    
+ 
     @app.route('/deputy', methods=['GET'])
     def get_deputy():
+        """Récupération de toutes les données à afficher sur le député séléctionné
+
+        Returns:
+            render_template: retourne le template d'affichage avec les informations et le graphique
+            reprenant les informations 
+        """        
         deputy_slug = request.args.get('select_field')
         deputy_activities = requests.get(f'https://www.nosdeputes.fr/synthese/data/{RESPONSE_FORMAT}').json()
         moyenne={}
-        deputy_stats = {}
+        deputy_stats={}
 
         deputy_details = get_deputy_data(deputy_slug, deputy_activities, deputy_stats)
-        
         get_global_statistics(deputy_activities, moyenne)
+        
+        chart = generate_chart(deputy_stats, moyenne)
         
         return render_template(
             '/components/details.html',  
             deputy_activities=deputy_details,
-            dt=moyenne,
-            deputy_stats=deputy_stats
+            deputy_stats=deputy_stats,
+            chart = chart
         )
 
-    def get_deputy_data(deputy_slug, deputy_activities, deputy_stats):
+    def get_deputy_data(deputy_slug, deputy_activities, deputy_stats) -> dict :
         for data in deputy_activities['deputes'] : 
             if data['depute']['slug'] == deputy_slug :
                 deputy_details = data["depute"]
+                deputy_stats['nom'] = data['depute']['nom']
                 deputy_stats['weeks'] = data['depute']['semaines_presence']
                 deputy_stats['proposes'] = round(data['depute']['amendements_proposes'] /data['depute']['semaines_presence'] ,2)
                 deputy_stats['signes'] = round(data['depute']['amendements_signes']/data['depute']['semaines_presence'] ,2)
                 deputy_stats['adoptes'] = round(data['depute']['amendements_adoptes']/data['depute']['semaines_presence'] ,2)
         return deputy_details
 
-    def get_global_statistics(deputy_activities, moyenne):
+    def get_global_statistics(deputy_activities, moyenne) -> None :
         deputy_number=0
         weeks_quantity=0
         amendements_proposes=0
@@ -95,5 +104,33 @@ def create_app(test_config=None) -> Flask:
     @app.route('/political-party/<political_party_id>', methods=['GET'])
     def get_political_party(political_party_id):
         return True    
+    
+    
+    def generate_chart(selected_stats : dict, global_stats : dict) :
+        # On vide le graphique pour éviter les superpositions
+        plt.clf()
+        
+        # Mise en forme de la data pour affichage
+        labels = ['proposés', 'signés', 'adoptés']
+        selected = [selected_stats['proposes'], selected_stats['signes'], selected_stats['adoptes']]
+        general = [global_stats['proposes'], global_stats['signes'], global_stats['adoptes']]
+        
+        # génération des barres
+        x_axis = np.arange(len(labels))
+        plt.bar(x_axis -0.2, selected, width=0.4, label=selected_stats['nom'])
+        plt.bar(x_axis + 0.2, general, width=0.4, label='moyenne')
+
+        # labels
+        plt.xticks(x_axis, labels)
+        
+        # Ajout de la légende
+        plt.legend()
+        
+        # Retour en base64 pour affichage
+        buf = BytesIO()
+        plt.savefig(buf, format="png", transparent=True)
+        data = base64.b64encode(buf.getbuffer()).decode("ascii")
+        
+        return data
     
     return app
