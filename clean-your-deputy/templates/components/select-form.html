@@ -1,14 +1,50 @@
 {% extends 'app.html' %}
 
 {% block result %}
-    <form method="GET" action="/deputy" class="flex flex-col">
-        <label>{{ deputy.select_field.label }}:</label>
-        {{ deputy.select_field }}
-        <input type="submit" value="Selectionner">
-    </form>
-    <form method="GET" action="/party" class="flex flex-col">
-        <label>{{ party.select_field.label }}:</label>
-        {{ party.select_field }}
-        <input type="submit" value="Selectionner">
-    </form>
+<div class="fr-grid-row--gutters fr-grid-row--center fr-mt-1w">
+    <div class="fr-col-sm-12 fr-col-md-6 fr-col-offset-md-3">
+        <div class="fr-card">
+            <form method="GET" action="/deputy">
+                <div class="fr-card__body">
+                    <div class="fr-card__content">
+                        <p class="fr-card__desc">
+                            <div class="fr-select-group">
+                                <label class="fr-label" for="select">
+                                    {{ deputy.select_field.label }}:
+                                </label>
+                            {{ deputy.select_field(class_="fr-select")}}
+                            <input type="submit" title="Selection" class="fr-btn fr-btn--secondary fr-mt-1w">
+                        </p>
+                        <div class="fr-card__start">
+                            <p class="fr-card__detail fr-icon-warning-fill">Pour plus de clareté dans la vie politique </p>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="fr-grid-row--gutters fr-grid-row--center fr-mt-1w">
+    <div class="fr-col-sm-12 fr-col-md-6 fr-col-offset-md-3">
+        <div class="fr-card">
+            <form method="GET" action="/party">
+                <div class="fr-card__body">
+                    <div class="fr-card__content">
+                        <p class="fr-card__desc">
+                            <div class="fr-select-group">
+                                <label class="fr-label" for="select">
+                                    {{ party.select_field.label }}:
+                                </label>
+                            {{ party.select_field(class_="fr-select")}}
+                            <input type="submit" title="Selection" class="fr-btn fr-btn--secondary fr-mt-1w">
+                        </p>
+                        <div class="fr-card__start">
+                            <p class="fr-card__detail fr-icon-warning-fill">Pour plus de clareté dans la vie politique </p>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}

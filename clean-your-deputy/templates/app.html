@@ -6,9 +6,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title> Clean your deputy </title>
     <link rel="stylesheet" href="{{ url_for('static',filename='css/app.css') }}">
+    <link rel="stylesheet" href="{{url_for('static', filename='css/dsfr.min.css')}}">
 </head>
-<body class="grid-container">
-    <main>
+<body>
+    <header role="banner" class="fr-header">
+        <div class="fr-header__body">
+            <div class="fr-container">
+                <div class="fr-header__body-row">
+                    <div class="fr-header__brand fr-enlarge-link">
+                        <div class="fr-header__brand-top">
+                            <div class="fr-header__logo">
+                                <p class="fr-logo">
+                                    Clean your deputy
+                                </p>
+                            </div>
+                        </div>
+                        <div class="fr-header__service">
+                            <a href="/" title="Accueil - [À MODIFIER - Nom du site / service] - [À MODIFIER - nom de l’entité (ministère, secrétariat d‘état, gouvernement)]">
+                                <p class="fr-header__service-title">
+                                    Statistiques sur les députés
+                                </p>
+                            </a>
+                            <p class="fr-header__service-tagline">pour plus de transparence</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <main class="fr-container--fluid fr-mt-1w">
         {% block result %} {% endblock %}
     </main>
     {% block scripts %} {% endblock %}
