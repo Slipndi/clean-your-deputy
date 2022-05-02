@@ -1,16 +1,134 @@
 {% extends 'app.html' %}
 
 {% block result %}
-<div class="flex flex-col">
-    <h1 class="flex align-center">
-        <a href="/">
-            <svg id='return' xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-        </a>
-        {{party['nom']}}
-    </h1>
-    <H3>Evaluation du temps de travail moyen hebdomadaire</H3>
+<div class="fr-grid-row--gutters fr-grid-row--center fr-mt-1w">
+    <div class="fr-col-sm-12 fr-col-md-6 fr-col-offset-md-3">
+        <h4>Evaluation du temps de travail moyen hebdomadaire</h4>
+    </div>
+</div>
+<div class="fr-grid-row--gutters fr-grid-row--center fr-mt-1w">
+    <div class="fr-col-sm-12 fr-col-md-6 fr-col-offset-md-3">
+        <div class="fr-card fr-card--horizontal">
+            <div class="fr-card__body">
+                <div class="fr-card__content">
+                    <h4 class="fr-card__title">
+                        {{party['nom']}}
+                    </h4>
+                    <p class="fr-card__desc">{{deputy_activities['profession']}} ({{deputy_activities['nom_circo']}})
+                    </p>
+                    <div class="fr-card__start">
+                        <p class="fr-card__detail fr-icon-warning-fill">{{deputy_activities['groupe_sigle']}} </p>
+                    </div>
+                    <div class="fr-card__end">
+                        <p class="fr-card__detail fr-icon-warning-fill">{{deputy_activities['parti_ratt_financier']}}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="fr-card__header">
+                <div class="flex justify-center fr-mt-1w">
+                    <img src="https://www.nosdeputes.fr/depute/photo/{{deputy_activities['slug']}}/200"
+                        alt="photo de {{deputy_activities['nom']}}" height="100%" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="fr-grid-row--gutters fr-grid-row--center fr-mt-1w">
+    <div class="fr-col-sm-12 fr-col-md-6 fr-col-offset-md-3">
+        <div class="fr-card fr-card--horizontal">
+            <div class="fr-card__body">
+                <div class="fr-card__content">
+                    <h4 class="fr-card__title">
+                        Activité Générale
+                    </h4>
+                    <div class="fr-card__end">
+                        <p class="fr-card__detail fr-icon-warning-fill">
+                            <ul>
+                                <li>
+                                    Interventions :
+                                    {{(deputy_activities['hemicycle_interventions'] / deputy_activities['semaines_presence']) | round(2, 'floor')}}
+                                </li>
+                                <li>
+                                    Questions orales :
+                                    {{(deputy_activities['questions_orales'] / deputy_activities['semaines_presence']) | round(2, 'floor')}}
+                                </li>
+                                <li>
+                                    Questions écrites :
+                                    {{(deputy_activities['questions_ecrites'] / deputy_activities['semaines_presence']) | round(2, 'floor')}}
+                                </li>
+                            </ul>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="fr-col-sm-12 fr-col-md-6 fr-col-offset-md-3">
+        <div class="fr-card fr-card--horizontal">
+            <div class="fr-card__body">
+                <div class="fr-card__content">
+                    <h4 class="fr-card__title">
+                        Commissions
+                    </h4>
+                    <div class="fr-card__end">
+                        <p class="fr-card__detail fr-icon-warning-fill">
+                            <ul>
+                                <li>
+                                    Interventions :
+                                    {{(deputy_activities['commission_interventions'] / deputy_activities['commission_presences']) | round(2, 'floor') }}
+                                </li>
+                                <li>
+                                    Rapports :
+                                    {{(deputy_activities['rapports'] / deputy_activities['commission_presences']) | round(2, 'floor')}}
+                                </li>
+                            </ul>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="fr-col-sm-12 fr-col-md-6 fr-col-offset-md-3">
+        <div class="fr-card fr-card--horizontal">
+            <div class="fr-card__body">
+                <div class="fr-card__content">
+                    <h4 class="fr-card__title">
+                        Production et améliorations des lois
+                    </h4>
+                    <div class="fr-card__start">
+                        <p class="fr-card__detail fr-icon-warning-fill"></p>
+                    </div>
+                    <div class="fr-card__end">
+                        <p class="fr-card__detail fr-icon-warning-fill">
+                            <ul>
+                                <li>
+                                    Amendements proposés : {{deputy_stats['proposes']}}
+                                </li>
+                                <li>
+                                    Amendements signés : {{deputy_stats['signes']}}
+                                </li>
+                                <li>
+                                    Amendements adoptés : {{deputy_stats['adoptes']}}
+                                </li>
+                            </ul>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="fr-card__header">
+                <div class="flex justify-center fr-mt-1w">
+                    <img src='data:image/png;base64,{{chart}}' width="100%" id="chart" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    {% endblock %}
+
+    {% block scripts %}
+    {% endblock %}
     <article>
         <h4>Activité générale</h4>
         <ul>
@@ -53,3 +171,4 @@
 
 {% block scripts %}
 {% endblock %}
+
