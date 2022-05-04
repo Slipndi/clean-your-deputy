@@ -1,1 +1,1 @@
-web: gunicorn app:cleanyourdeputy.app
+web: gunicorn run:cleanyourdeputy.app
