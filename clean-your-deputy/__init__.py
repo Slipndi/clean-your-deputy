@@ -128,9 +128,14 @@ def create_app(test_config=None) -> Flask:
                 deputy_details = data["depute"]
                 deputy_stats['nom'] = data['depute']['nom']
                 deputy_stats['weeks'] = data['depute']['semaines_presence']
-                deputy_stats['proposes'] = round(data['depute']['amendements_proposes'] /data['depute']['semaines_presence'] ,ROUND_VALUE)
-                deputy_stats['signes'] = round(data['depute']['amendements_signes']/data['depute']['semaines_presence'] ,ROUND_VALUE)
-                deputy_stats['adoptes'] = round(data['depute']['amendements_adoptes']/data['depute']['semaines_presence'] ,ROUND_VALUE)
+                if deputy_stats['weeks'] > 0 : 
+                    deputy_stats['proposes'] = round(data['depute']['amendements_proposes'] /data['depute']['semaines_presence'] ,ROUND_VALUE)
+                    deputy_stats['signes'] = round(data['depute']['amendements_signes']/data['depute']['semaines_presence'] ,ROUND_VALUE)
+                    deputy_stats['adoptes'] = round(data['depute']['amendements_adoptes']/data['depute']['semaines_presence'] ,ROUND_VALUE)
+                else : 
+                    deputy_stats['proposes'] = 0
+                    deputy_stats['signes'] = 0
+                    deputy_stats['adoptes'] = 0
         return deputy_details
     
     def get_party_data(acronyme : str, deputies_activity: dict) -> dict : 
@@ -153,14 +158,22 @@ def create_app(test_config=None) -> Flask:
         party_data['count'] = count
         party_data['nom'] = acronyme
         party_data['weeks'] = weeks
-        party_data['tea']=oral
-        party_data['oral'] = round(oral/weeks, ROUND_VALUE)
-        party_data['write'] = round(write/weeks, ROUND_VALUE)
-        party_data['proposes'] = round(proposes/weeks, ROUND_VALUE)
-        party_data['signes'] = round(signes/weeks, ROUND_VALUE)
-        party_data['adoptes'] = round(adoptes/weeks, ROUND_VALUE)
-        party_data['interventions'] = round(interventions/presences, ROUND_VALUE)
-        party_data['rapports'] = round(rapports/presences, ROUND_VALUE)
+        if weeks > 0 : 
+            party_data['oral'] = round(oral/weeks, ROUND_VALUE)
+            party_data['write'] = round(write/weeks, ROUND_VALUE)
+            party_data['proposes'] = round(proposes/weeks, ROUND_VALUE)
+            party_data['signes'] = round(signes/weeks, ROUND_VALUE)
+            party_data['adoptes'] = round(adoptes/weeks, ROUND_VALUE)
+            party_data['interventions'] = round(interventions/presences, ROUND_VALUE)
+            party_data['rapports'] = round(rapports/presences, ROUND_VALUE)
+        else : 
+            party_data['oral'] = 0
+            party_data['write'] = 0
+            party_data['proposes'] = 0
+            party_data['signes'] = 0
+            party_data['adoptes'] = 0
+            party_data['interventions'] = 0
+            party_data['rapports'] = 0
         
         return party_data
         
