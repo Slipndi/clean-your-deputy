@@ -1,1 +1,1 @@
-web: gunicorn cleanyourdeputy:app
+web: gunicorn manage:app
