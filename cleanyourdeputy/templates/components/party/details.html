@@ -1,0 +1,101 @@
+{% extends 'app.html' %}
+
+{% block result %}
+<div class="fr-grid-row--gutters fr-grid-row--center fr-mt-1w">
+    <div class="fr-col-sm-12 fr-col-md-6 fr-col-offset-md-3">
+        <h4>Evaluation du temps de travail moyen hebdomadaire</h4>
+    </div>
+</div>
+<div class="fr-grid-row--gutters fr-grid-row--center fr-mt-1w">
+    <div class="fr-col-sm-12 fr-col-md-6 fr-col-offset-md-3">
+        <div class="fr-card fr-card--horizontal">
+            <div class="fr-card__body">
+                <div class="fr-card__content">
+                    <h4 class="fr-card__title">
+                        {{party['nom']}}
+                    </h4>
+                    <p class="fr-card__desc">Activité générale</p>
+                    <div class="fr-card__start">
+                        <p class="fr-card__detail fr-icon-warning-fill"></p>
+                    </div>
+                    <div class="fr-card__end">
+                        <p class="fr-card__detail fr-icon-warning-fill">
+                            <ul>
+                                <li>
+                                    Questions orales : {{party['oral']}}
+                                </li>
+                                <li>
+                                    Questions écrites : {{party['write']}}
+                                </li>
+                            </ul>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="fr-card__header">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="fr-grid-row--gutters fr-grid-row--center fr-mt-1w">
+    <div class="fr-col-sm-12 fr-col-md-6 fr-col-offset-md-3">
+        <div class="fr-card fr-card--horizontal">
+            <div class="fr-card__body">
+                <div class="fr-card__content">
+                    <h4 class="fr-card__title">
+                        Commissions
+                    </h4>
+                    <div class="fr-card__end">
+                        <p class="fr-card__detail fr-icon-warning-fill">
+                            <ul>
+                                <li>
+                                    Interventions : {{party['interventions']}}
+                                </li>
+                                <li>
+                                    Rapports :{{party['rapports']}}
+                                </li>
+                            </ul>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="fr-col-sm-12 fr-col-md-6 fr-col-offset-md-3">
+        <div class="fr-card fr-card--horizontal">
+            <div class="fr-card__body">
+                <div class="fr-card__content">
+                    <h4 class="fr-card__title">
+                        Production et améliorations des lois
+                    </h4>
+                    <div class="fr-card__start">
+                        <p class="fr-card__detail fr-icon-warning-fill"></p>
+                    </div>
+                    <div class="fr-card__end">
+                        <p class="fr-card__detail fr-icon-warning-fill">
+                            <ul>
+                                <li>
+                                    Amendements proposés : {{party['proposes']}}
+                                </li>
+                                <li>
+                                    Amendements signés : {{party['signes']}}
+                                </li>
+                                <li>
+                                    Amendements adoptés : {{party['adoptes']}}
+                                </li>
+                            </ul>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="fr-card__header">
+                <div class="flex justify-center fr-mt-1w">
+                    <img src='data:image/png;base64,{{chart}}' width="100%" id="chart" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
