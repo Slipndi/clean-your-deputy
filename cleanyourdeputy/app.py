@@ -55,7 +55,7 @@ def create_app(test_config=None) -> Flask:
         return render_template('/components/select-form.html', deputy=deputy_form, party=party_form)
     
     @app.route('/deputy', methods=['GET'])
-    def get_deputy():
+    def get_deputy() -> render_template :
         """Récupération de toutes les données à afficher sur le député séléctionné
 
         Returns:
@@ -80,7 +80,12 @@ def create_app(test_config=None) -> Flask:
         )
 
     @app.route('/party', methods=['GET'])
-    def get_party():
+    def get_party() -> render_template :
+        """Route permetant l'affichage des partis politiques
+
+        Returns:
+            render_template: la page html composé des informations  JSON et du graphique généré.
+        """        
         moyenne={}
         party_acronyme = request.args.get('select_field')
         party_data =get_party_data (party_acronyme, get_deputies_activities())
@@ -92,6 +97,16 @@ def create_app(test_config=None) -> Flask:
     
     
     def generate_chart(selected_stats : dict, global_stats : dict) -> base64 :
+        """Génération d'un chart à l'aide de la bibliothèque matplotlib
+        
+
+        Args:
+            selected_stats (dict): Statistiques spécifique au député / parti
+            global_stats (dict): Statistiques générale 
+
+        Returns:
+            base64: l'image en base64
+        """        
         nom = selected_stats['nom']
         # On vide le graphique pour éviter les superpositions
         plt.clf()
@@ -119,9 +134,24 @@ def create_app(test_config=None) -> Flask:
         return data
     
     def get_deputies_activities() -> dict :
+        """Récupération de l'activité de tous les députés
+
+        Returns:
+            dict: Récupération de toute les données de l'api
+        """        
         return requests.get(f'https://www.nosdeputes.fr/synthese/data/{RESPONSE_FORMAT}').json()
 
-    def get_deputy_data(deputy_slug, deputy_activities, deputy_stats) -> dict :
+    def get_deputy_data(deputy_slug:str, deputy_activities:dict, deputy_stats:dict) -> dict :
+        """Récupération des données du député selectionné uniquement
+
+        Args:
+            deputy_slug (str): slug du député
+            deputy_activities (dict): activité général des députés
+            deputy_stats (dict): dict à renseigner et renvoyer
+
+        Returns:
+            dict: _description_
+        """        
         for data in deputy_activities['deputes'] : 
             if data['depute']['slug'] == deputy_slug :
                 deputy_details = data["depute"]
@@ -138,6 +168,15 @@ def create_app(test_config=None) -> Flask:
         return deputy_details
     
     def get_party_data(acronyme : str, deputies_activity: dict) -> dict : 
+        """ Récupération des données du parti politique séléctionné
+
+        Args:
+            acronyme (str): code du parti
+            deputies_activity (dict): dict python contenant l'activité des députés
+
+        Returns:
+            dict: dict reprenant les données à afficher sur la page principale
+        """        
         party_data = {}
         count=weeks=oral=write=proposes=signes=adoptes=presences=interventions=rapports=0
         
@@ -177,7 +216,13 @@ def create_app(test_config=None) -> Flask:
         return party_data
         
 
-    def get_global_statistics(deputy_activities, moyenne) -> None :
+    def get_global_statistics(deputy_activities:dict, moyenne:dict) -> None :
+        """Récupération de toutes les statistiques
+
+        Args:
+            deputy_activities (dict): dictionnaire python contenant toute l'activité des députés
+            moyenne (dict): dict à retourner
+        """        
         deputy_number=0
         weeks_quantity=0
         amendements_proposes=0
